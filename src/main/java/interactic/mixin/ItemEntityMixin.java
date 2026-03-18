@@ -10,6 +10,9 @@ import net.minecraft.component.type.AttributeModifiersComponent;
 import net.minecraft.entity.*;
 import net.minecraft.entity.attribute.EntityAttributeModifier;
 import net.minecraft.entity.attribute.EntityAttributes;
+import net.minecraft.entity.data.DataTracker;
+import net.minecraft.entity.data.TrackedData;
+import net.minecraft.entity.data.TrackedDataHandlerRegistry;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
@@ -39,7 +42,7 @@ public abstract class ItemEntityMixin extends Entity implements InteracticItemEx
     public abstract Entity getOwner();
 
     @Unique
-    private float rotation = -1;
+    private static final TrackedData<Float> INTERACTIC_ROTATION = DataTracker.registerData(ItemEntity.class, TrackedDataHandlerRegistry.FLOAT);
 
     @Unique
     private boolean wasThrown;
@@ -53,12 +56,12 @@ public abstract class ItemEntityMixin extends Entity implements InteracticItemEx
 
     @Override
     public float getRotation() {
-        return rotation;
+        return this.getDataTracker().get(INTERACTIC_ROTATION);
     }
 
     @Override
     public void setRotation(float rotation) {
-        this.rotation = rotation;
+        this.getDataTracker().set(INTERACTIC_ROTATION, rotation);
     }
 
     @Override
@@ -69,6 +72,11 @@ public abstract class ItemEntityMixin extends Entity implements InteracticItemEx
     @Override
     public void markFullPower() {
         this.wasFullPower = true;
+    }
+
+    @Inject(method = "initDataTracker", at = @At("TAIL"))
+    private void initInteracticData(DataTracker.Builder builder, CallbackInfo ci) {
+        builder.add(INTERACTIC_ROTATION, -1f);
     }
 
     @Inject(method = "onPlayerCollision", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/ItemEntity;getStack()Lnet/minecraft/item/ItemStack;", ordinal = 0), cancellable = true)
@@ -82,20 +90,20 @@ public abstract class ItemEntityMixin extends Entity implements InteracticItemEx
         if (!InteracticInit.getConfig().itemsActAsProjectiles()) return;
         if (itemAge < 2) return;
 
-        var world = this.getWorld();
-        if (world.isClient) return;
+        var world = this.getEntityWorld();
+        if (world.isClient()) return;
 
         if (this.isOnGround()) this.wasThrown = false;
         if (!this.wasThrown) return;
 
         final var hasDamageModifiers = this.getStack().getOrDefault(DataComponentTypes.ATTRIBUTE_MODIFIERS, AttributeModifiersComponent.DEFAULT)
-                .modifiers().stream().anyMatch(entry -> entry.attribute().value() == EntityAttributes.GENERIC_ATTACK_DAMAGE);
+                .modifiers().stream().anyMatch(entry -> entry.attribute().matches(EntityAttributes.ATTACK_DAMAGE));
         if (!(this.wasFullPower || hasDamageModifiers)) return;
 
         var damage = new MutableDouble(2d);
         if (hasDamageModifiers) {
             this.getStack().applyAttributeModifiers(EquipmentSlot.MAINHAND, (attribEntry, modifier) -> {
-                if (attribEntry.value() != EntityAttributes.GENERIC_ATTACK_DAMAGE || modifier.operation() != EntityAttributeModifier.Operation.ADD_VALUE) return;
+                if (!attribEntry.matches(EntityAttributes.ATTACK_DAMAGE) || modifier.operation() != EntityAttributeModifier.Operation.ADD_VALUE) return;
                 damage.add(modifier.value());
             });
         }
@@ -106,9 +114,9 @@ public abstract class ItemEntityMixin extends Entity implements InteracticItemEx
         final var target = entities.get(0);
         final var damageSource = new ItemDamageSource((ItemEntity) (Object) this, this.getOwner());
 
-        if (target.hurtTime != 0 || target.isInvulnerableTo(damageSource)) return;
+        if (target.hurtTime != 0 || target.isInvulnerableTo((ServerWorld) world, damageSource)) return;
 
-        target.damage(damageSource, damage.floatValue());
+        target.damage((ServerWorld) world, damageSource, damage.floatValue());
         this.getStack().damage(1, (ServerWorld) world, null, item -> this.discard());
     }
 

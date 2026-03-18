@@ -31,10 +31,12 @@ public class InteracticNetworking {
 
 
         CHANNEL.registerServerbound(DropWithPower.class, (message, access) -> {
-            ((InteracticPlayerExtension) access.player()).setDropPower(message.power);
+            var ext = (InteracticPlayerExtension) access.player();
+            ext.setDropPower(message.power);
+            ext.setDropDirection(message.pitch, message.yaw);
 
             var player = access.player();
-            player.dropItem(player.getInventory().removeStack(player.getInventory().selectedSlot, message.dropAll && !player.getInventory().getMainHandStack().isEmpty() ? player.getInventory().getMainHandStack().getCount() : 1), false, true);
+            player.dropItem(player.getInventory().removeStack(player.getInventory().getSelectedSlot(), message.dropAll && !player.getMainHandStack().isEmpty() ? player.getMainHandStack().getCount() : 1), false, true);
         });
 
         CHANNEL.registerServerbound(FilterModeRequest.class, (message, access) -> {
@@ -55,7 +57,7 @@ public class InteracticNetworking {
 
     public record Pickup() {}
 
-    public record DropWithPower(float power, boolean dropAll) {}
+    public record DropWithPower(float power, boolean dropAll, float pitch, float yaw) {}
 
     public record FilterModeRequest(boolean newMode) {}
 }

@@ -9,6 +9,7 @@ import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.TexturedButtonWidget;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.text.Text;
+import net.minecraft.client.gl.RenderPipelines;
 import net.minecraft.util.Identifier;
 
 public class ItemFilterScreen extends HandledScreen<ItemFilterScreenHandler> {
@@ -53,10 +54,10 @@ public class ItemFilterScreen extends HandledScreen<ItemFilterScreenHandler> {
 
     @Override
     protected void drawBackground(DrawContext context, float delta, int mouseX, int mouseY) {
-        context.drawTexture(TEXTURE, this.x, this.y, 0, 0, this.backgroundWidth, this.backgroundHeight);
+        context.drawTexture(RenderPipelines.GUI_TEXTURED, TEXTURE, this.x, this.y, 0, 0, this.backgroundWidth, this.backgroundHeight, 256, 256);
 
         if (!this.blockMode) {
-            context.drawTexture(TEXTURE, this.x + 7, this.y + 19, 0, 178, 162, 54);
+            context.drawTexture(RenderPipelines.GUI_TEXTURED, TEXTURE, this.x + 7, this.y + 19, 0, 178, 162, 54, 256, 256);
         }
     }
 }

@@ -56,6 +56,6 @@ public class InteracticConfigModel {
     @Comment("Whether your arms should swing when dropping items")
     public boolean swingArm = true;
 
-    @Comment("Whether block items should lay flat on the ground")
-    public boolean blocksLayFlat = false;
+    @Comment("Whether dropped items (blocks, diamonds, etc.) should lay flat on the ground")
+    public boolean blocksLayFlat = true;
 }

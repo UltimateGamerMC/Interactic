@@ -4,14 +4,19 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.ItemEntity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.damage.DamageSource;
-import net.minecraft.item.*;
+import net.minecraft.component.DataComponentTypes;
+import net.minecraft.item.AxeItem;
+import net.minecraft.item.HoeItem;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.ShovelItem;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.Nullable;
 
 public class ItemDamageSource extends DamageSource {
 
     public ItemDamageSource(ItemEntity projectile, @Nullable Entity attacker) {
-        super(projectile.getWorld().getDamageSources().thrown(projectile, attacker).getTypeRegistryEntry(), projectile, attacker);
+        super(projectile.getEntityWorld().getDamageSources().thrown(projectile, attacker).getTypeRegistryEntry(), projectile, attacker);
     }
 
     @Override
@@ -19,11 +24,14 @@ public class ItemDamageSource extends DamageSource {
         Text attackerName = this.getAttacker() == null ? this.getSource().getDisplayName() : this.getAttacker().getDisplayName();
         ItemStack itemStack = ((ItemEntity) this.getSource()).getStack();
         String key = "death.attack.thrown_item";
-        if (itemStack.getItem() instanceof SwordItem) key = key + ".sword";
-        if (itemStack.getItem() instanceof AxeItem) key = key + ".axe";
-        if (itemStack.getItem() instanceof PickaxeItem) key = key + ".pickaxe";
-        if (itemStack.getItem() instanceof ShovelItem) key = key + ".shovel";
-        if (itemStack.getItem() instanceof HoeItem) key = key + ".hoe";
+        if (itemStack.contains(DataComponentTypes.WEAPON)) {
+            String path = net.minecraft.registry.Registries.ITEM.getId(itemStack.getItem()).getPath();
+            if (path.contains("sword")) key = key + ".sword";
+            else if (path.contains("axe")) key = key + ".axe";
+            else if (path.contains("pickaxe")) key = key + ".pickaxe";
+            else if (path.contains("shovel")) key = key + ".shovel";
+            else if (path.contains("hoe")) key = key + ".hoe";
+        }
         return Text.translatable(key, entity.getDisplayName(), attackerName, itemStack.toHoverableText());
     }
 }

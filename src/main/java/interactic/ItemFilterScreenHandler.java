@@ -1,7 +1,6 @@
 package interactic;
 
 import interactic.util.InteracticNetworking;
-import io.wispforest.owo.client.screens.ScreenUtils;
 import io.wispforest.owo.client.screens.SlotGenerator;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
@@ -54,7 +53,7 @@ public class ItemFilterScreenHandler extends ScreenHandler {
 
     @Override
     public ItemStack quickMove(PlayerEntity player, int index) {
-        return ScreenUtils.handleSlotTransfer(this, index, 0);
+        return ItemStack.EMPTY;
     }
 
     @Override

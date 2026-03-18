@@ -2,8 +2,8 @@ package interactic.util;
 
 import interactic.InteracticInit;
 import interactic.ItemFilterItem;
-import interactic.mixin.PlayerInventoryAccessor;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.ProjectileUtil;
@@ -27,9 +27,9 @@ public class Helpers {
                 camera.getBoundingBox().stretch(normalizedFacing.multiply(reach)).expand(1), entity -> entity instanceof ItemEntity, reach * reach);
 
         if (result != null) {
-            var distance = camera.getPos().distanceTo(result.getPos()) - .3;
+            var distance = new Vec3d(camera.getX(), camera.getY(), camera.getZ()).distanceTo(result.getPos()) - .3;
             if (camera.raycast(distance, 1f, false) instanceof BlockHitResult blockResult) {
-                if (!camera.getWorld().getBlockState(blockResult.getBlockPos()).getCollisionShape(camera.getWorld(), blockResult.getBlockPos()).isEmpty()) {
+                if (!camera.getEntityWorld().getBlockState(blockResult.getBlockPos()).getCollisionShape(camera.getEntityWorld(), blockResult.getBlockPos()).isEmpty()) {
                     return null;
                 }
             }
@@ -44,8 +44,13 @@ public class Helpers {
         }
 
         if (!InteracticInit.getConfig().itemFilterEnabled()) return true;
-        var filters = ((PlayerInventoryAccessor) player.getInventory()).getCombinedInventory().stream()
-                .flatMap(Collection::stream)
+        var allStacks = new java.util.ArrayList<ItemStack>();
+        allStacks.addAll(player.getInventory().getMainStacks());
+        for (EquipmentSlot slot : EquipmentSlot.values()) {
+            if (slot != EquipmentSlot.MAINHAND && slot != EquipmentSlot.BODY && slot != EquipmentSlot.SADDLE)
+                allStacks.add(player.getEquippedStack(slot));
+        }
+        var filters = allStacks.stream()
                 .filter(stack -> stack.isOf(InteracticInit.getItemFilter()))
                 .filter(stack -> stack.getOrDefault(ItemFilterItem.ENABLED, false))
                 .map(stack -> new FilterEntry(stack, ItemFilterItem.getItemsInFilter(stack), stack.getOrDefault(ItemFilterItem.BLOCK_MODE, false)))
