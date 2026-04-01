@@ -1,7 +1,7 @@
 {
   "required": true,
   "package": "interactic.mixin",
-  "compatibilityLevel": "JAVA_21",
+  "compatibilityLevel": "JAVA_25",
   "client": [
     "InGameHudMixin",
     "ItemEntityRenderStateMixin",
@@ -15,7 +15,6 @@
     "ItemEntityAccessor",
     "ItemEntityMixin",
     "LivingEntityMixin",
-    "PlayerEntityMixin",
-    "RecipeManagerMixin"
+    "PlayerEntityMixin"
   ]
 }

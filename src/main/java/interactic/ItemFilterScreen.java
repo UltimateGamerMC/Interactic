@@ -1,63 +1,66 @@
 package interactic;
 
 import interactic.util.InteracticNetworking;
-import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.ingame.HandledScreen;
-import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.client.gui.widget.TexturedButtonWidget;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.text.Text;
-import net.minecraft.client.gl.RenderPipelines;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
+import net.minecraft.world.entity.player.Inventory;
 
-public class ItemFilterScreen extends HandledScreen<ItemFilterScreenHandler> {
+public class ItemFilterScreen extends AbstractContainerScreen<ItemFilterScreenHandler> {
 
     private static final Identifier TEXTURE = InteracticInit.id("textures/gui/item_filter.png");
 
     public boolean blockMode = true;
 
-    private ButtonWidget blockButton = null;
-    private ButtonWidget allowButton = null;
+    private Button blockButton;
+    private Button allowButton;
 
-    public ItemFilterScreen(ItemFilterScreenHandler handler, PlayerInventory inventory, Text title) {
-        super(handler, inventory, title);
-        this.backgroundHeight = 178;
-        this.playerInventoryTitleY = 69420;
+    public ItemFilterScreen(ItemFilterScreenHandler handler, Inventory inventory, Component title) {
+        super(handler, inventory, title, 176, 178);
+        this.inventoryLabelY = 69420;
     }
 
     @Override
     protected void init() {
         super.init();
-        this.titleX = (this.backgroundWidth - this.textRenderer.getWidth(this.title)) / 2;
-
-        this.addDrawableChild(this.blockButton = ButtonWidget.builder(Text.literal("Block"), button -> sendModeRequest(true)).dimensions(this.x + 43, this.y + 78, 60, 12).build());
-        this.addDrawableChild(this.allowButton = ButtonWidget.builder(Text.literal("Allow"), button -> sendModeRequest(false)).dimensions(this.x + 108, this.y + 78, 60, 12).build());
+        this.titleLabelX = (this.imageWidth - this.font.width(this.title)) / 2;
+        this.blockButton = this.addRenderableWidget(
+                Button.builder(Component.literal("Block"), b -> sendModeRequest(true))
+                        .bounds(this.leftPos + 43, this.topPos + 78, 60, 12)
+                        .build()
+        );
+        this.allowButton = this.addRenderableWidget(
+                Button.builder(Component.literal("Allow"), b -> sendModeRequest(false))
+                        .bounds(this.leftPos + 108, this.topPos + 78, 60, 12)
+                        .build()
+        );
     }
 
     private static void sendModeRequest(boolean mode) {
         InteracticNetworking.CHANNEL.clientHandle().send(new InteracticNetworking.FilterModeRequest(mode));
     }
 
-    @SuppressWarnings({"ConstantConditions"})
-    public void render(DrawContext context, int mouseX, int mouseY, float delta) {
-        super.render(context, mouseX, mouseY, delta);
-
-        context.drawText(this.client.textRenderer, "Mode", this.x + 8, this.y + 80, 0x404040, false);
-
-        this.drawMouseoverTooltip(context, mouseX, mouseY);
-
-        this.blockButton.active = !this.blockMode;
-        this.allowButton.active = this.blockMode;
+    @Override
+    public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
+        super.extractRenderState(graphics, mouseX, mouseY, partialTick);
+        graphics.text(this.font, "Mode", this.leftPos + 8, this.topPos + 80, 0x404040, false);
+        if (this.blockButton != null) {
+            this.blockButton.active = !this.blockMode;
+            this.allowButton.active = this.blockMode;
+        }
     }
 
     @Override
-    protected void drawBackground(DrawContext context, float delta, int mouseX, int mouseY) {
-        context.drawTexture(RenderPipelines.GUI_TEXTURED, TEXTURE, this.x, this.y, 0, 0, this.backgroundWidth, this.backgroundHeight, 256, 256);
-
+    public void extractBackground(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
+        super.extractBackground(graphics, mouseX, mouseY, partialTick);
+        int xo = this.leftPos;
+        int yo = this.topPos;
+        graphics.blit(RenderPipelines.GUI_TEXTURED, TEXTURE, xo, yo, 0.0F, 0.0F, this.imageWidth, this.imageHeight, 256, 256);
         if (!this.blockMode) {
-            context.drawTexture(RenderPipelines.GUI_TEXTURED, TEXTURE, this.x + 7, this.y + 19, 0, 178, 162, 54, 256, 256);
+            graphics.blit(RenderPipelines.GUI_TEXTURED, TEXTURE, xo + 7, yo + 19, 0.0F, 178.0F, 162, 54, 256, 256);
         }
     }
 }

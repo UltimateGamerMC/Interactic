@@ -4,7 +4,7 @@ import interactic.util.ServerSideConfigOption;
 import io.wispforest.owo.config.Option;
 import io.wispforest.owo.config.ui.ConfigScreen;
 import io.wispforest.owo.config.ui.OptionComponentFactory;
-import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.screens.Screen;
 import org.jetbrains.annotations.Nullable;
 
 public class InteracticConfigScreen extends ConfigScreen {

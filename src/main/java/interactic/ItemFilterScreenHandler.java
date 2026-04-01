@@ -1,88 +1,94 @@
 package interactic;
 
 import interactic.util.InteracticNetworking;
-import io.wispforest.owo.client.screens.SlotGenerator;
-import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
-import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.inventory.Inventory;
-import net.minecraft.inventory.SimpleInventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.screen.ScreenHandler;
-import net.minecraft.screen.slot.Slot;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.Identifier;
+import net.minecraft.world.Container;
+import net.minecraft.world.SimpleContainer;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.ItemStack;
 
-public class ItemFilterScreenHandler extends ScreenHandler {
+public class ItemFilterScreenHandler extends AbstractContainerMenu {
 
     public static final int SLOT_COUNT = 27;
-    private final Inventory inventory;
-    private final PlayerEntity player;
+    private final Container inventory;
+    private final Player player;
 
-    public ItemFilterScreenHandler(int syncId, PlayerInventory playerInventory) {
-        this(syncId, playerInventory, new SimpleInventory(SLOT_COUNT));
+    public ItemFilterScreenHandler(int syncId, net.minecraft.world.entity.player.Inventory playerInventory) {
+        this(syncId, playerInventory, new SimpleContainer(SLOT_COUNT));
     }
 
-    public ItemFilterScreenHandler(int syncId, PlayerInventory playerInventory, Inventory inventory) {
+    public ItemFilterScreenHandler(int syncId, net.minecraft.world.entity.player.Inventory playerInventory, Container inventory) {
         super(InteracticInit.ITEM_FILTER_SCREEN_HANDLER, syncId);
         this.inventory = inventory;
-        checkSize(inventory, SLOT_COUNT);
-
+        checkContainerSize(inventory, SLOT_COUNT);
         this.player = playerInventory.player;
-        inventory.onOpen(player);
-
-        SlotGenerator.begin(this::addSlot, 8, 20)
-                .slotFactory(GhostSlot::new)
-                .grid(inventory, 0, 9, 3)
-                .defaultSlotFactory()
-                .moveTo(8, 96)
-                .playerInventory(playerInventory);
+        inventory.startOpen(playerInventory.player);
+        for (int row = 0; row < 3; row++) {
+            for (int col = 0; col < 9; col++) {
+                int slot = col + row * 9;
+                this.addSlot(new GhostSlot(inventory, slot, 8 + col * 18, 20 + row * 18));
+            }
+        }
+        this.addStandardInventorySlots(playerInventory, 8, 96);
     }
 
     public void setFilterMode(boolean mode) {
         if (!(inventory instanceof ItemFilterItem.FilterInventory filterInventory)) return;
         filterInventory.setFilterMode(mode);
-
         InteracticNetworking.CHANNEL.serverHandle(player).send(new ItemFilterItem.SetFilterModePacket(mode));
     }
 
-    public boolean canUse(PlayerEntity player) {
-        return this.inventory.canPlayerUse(player);
+    @Override
+    public boolean stillValid(Player player) {
+        return this.inventory.stillValid(player);
     }
 
     @Override
-    public ItemStack quickMove(PlayerEntity player, int index) {
+    public ItemStack quickMoveStack(Player player, int index) {
         return ItemStack.EMPTY;
     }
 
     @Override
-    public void onClosed(PlayerEntity playerEntity) {
-        super.onClosed(playerEntity);
-        this.inventory.onClose(playerEntity);
+    public void removed(Player player) {
+        super.removed(player);
+        this.inventory.stopOpen(player);
     }
 
     private static class GhostSlot extends Slot {
 
-        public GhostSlot(Inventory inventory, int index, int x, int y) {
+        GhostSlot(Container inventory, int index, int x, int y) {
             super(inventory, index, x, y);
         }
 
         @Override
-        public int getMaxItemCount() {
+        public int getMaxStackSize() {
             return 1;
         }
 
         @Override
-        public boolean canInsert(ItemStack stack) {
-            this.setStack(new ItemStack(stack.getItem()));
+        public boolean mayPlace(ItemStack stack) {
+            return true;
+        }
+
+        @Override
+        public void setByPlayer(ItemStack stack, ItemStack previous) {
+            if (!stack.isEmpty()) {
+                this.set(new ItemStack(stack.getItem(), 1));
+            } else {
+                this.set(ItemStack.EMPTY);
+            }
+        }
+
+        @Override
+        public boolean mayPickup(Player player) {
+            this.set(ItemStack.EMPTY);
             return false;
         }
 
         @Override
-        public boolean canTakeItems(PlayerEntity playerEntity) {
-            this.setStack(ItemStack.EMPTY);
-            return false;
+        public boolean isFake() {
+            return true;
         }
     }
 }

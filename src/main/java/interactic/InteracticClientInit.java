@@ -4,26 +4,28 @@ import interactic.util.InteracticNetworking;
 import io.wispforest.owo.config.ui.ConfigScreen;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
-import net.minecraft.client.gui.screen.ingame.HandledScreens;
-import net.minecraft.client.option.KeyBinding;
-import net.minecraft.client.util.InputUtil;
-import net.minecraft.util.Hand;
-import net.minecraft.util.Identifier;
+import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
+import net.minecraft.client.KeyMapping;
+import net.minecraft.client.gui.screens.MenuScreens;
+import net.minecraft.client.Minecraft;
+import net.minecraft.world.InteractionHand;
+import com.mojang.blaze3d.platform.InputConstants;
 
 public class InteracticClientInit implements ClientModInitializer {
 
-    public static final KeyBinding PICKUP_ITEM = KeyBindingHelper.registerKeyBinding(new KeyBinding("key.interactic.pickup_item",
-            InputUtil.UNKNOWN_KEY.getCode(), KeyBinding.Category.MISC));
+    public static final KeyMapping PICKUP_ITEM = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.interactic.pickup_item",
+            InputConstants.UNKNOWN.getValue(), KeyMapping.Category.MISC));
 
     @Override
     public void onInitializeClient() {
-        HandledScreens.register(InteracticInit.ITEM_FILTER_SCREEN_HANDLER, ItemFilterScreen::new);
+        MenuScreens.register(InteracticInit.ITEM_FILTER_SCREEN_HANDLER, ItemFilterScreen::new);
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
-            while (PICKUP_ITEM.wasPressed()) {
+            while (PICKUP_ITEM.consumeClick()) {
                 InteracticNetworking.CHANNEL.clientHandle().send(new InteracticNetworking.Pickup());
-                client.player.swingHand(Hand.MAIN_HAND);
+                if (client.player != null) {
+                    client.player.swing(InteractionHand.MAIN_HAND);
+                }
             }
         });
 
