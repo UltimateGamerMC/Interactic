@@ -6,7 +6,9 @@ import interactic.util.Helpers;
 import interactic.util.InteracticNetworking;
 import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.MultiPlayerGameMode;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.world.item.component.SwingAnimation;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.ItemStack;
@@ -35,24 +37,24 @@ public class MinecraftClientMixin {
 
     @Shadow
     @Nullable
-    public net.minecraft.world.entity.Entity cameraEntity;
-
-    @Shadow
-    @Nullable
     public LocalPlayer player;
 
     @Shadow
     @Final
     public net.minecraft.client.Options options;
 
+    @Shadow
+    @Nullable
+    public MultiPlayerGameMode gameMode;
+
     @Inject(method = "startUseItem", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/player/LocalPlayer;isHandsBusy()Z", shift = At.Shift.AFTER), cancellable = true)
     private void interactic$tryPickupItem(CallbackInfo ci) {
         if (this.player == null || this.player.isHandsBusy()) return;
         if (!InteracticInit.getConfig().rightClickPickup()) return;
         if (KeyMappingHelper.getBoundKeyOf(InteracticClientInit.PICKUP_ITEM).getValue() != InputConstants.UNKNOWN.getValue()) return;
-        if (Helpers.raycastItem(this.cameraEntity, (float) this.player.getAttributeValue(Attributes.BLOCK_INTERACTION_RANGE)) == null) return;
-        InteracticNetworking.CHANNEL.clientHandle().send(new InteracticNetworking.Pickup());
-        this.player.swing(InteractionHand.MAIN_HAND);
+        if (Helpers.raycastItem(((Minecraft) (Object) this).getCameraEntity(), (float) this.player.getAttributeValue(Attributes.BLOCK_INTERACTION_RANGE)) == null) return;
+        InteracticNetworking.sendToServer(new InteracticNetworking.Pickup());
+        this.player.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, false);
         ci.cancel();
     }
 
@@ -72,17 +74,10 @@ public class MinecraftClientMixin {
         }
     }
 
-    @Redirect(method = "handleKeybinds", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/player/LocalPlayer;drop(Z)Z"))
-    private boolean interactic$handleQuickDrop(LocalPlayer clientPlayer, boolean dropEntireStack) {
-        if (!InteracticInit.getConfig().itemThrowing()) return clientPlayer.drop(dropEntireStack);
-        if (!((Minecraft) (Object) this).hasShiftDown()) return false;
-        return clientPlayer.drop(dropEntireStack);
-    }
-
-    @Redirect(method = "handleKeybinds", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/player/LocalPlayer;swing(Lnet/minecraft/world/InteractionHand;)V"))
-    private void interactic$dontSwingArms(LocalPlayer player, InteractionHand hand) {
-        if (!InteracticInit.getConfig().swingArm()) return;
-        player.swing(hand);
+    @Redirect(method = "handleKeybinds", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/MultiPlayerGameMode;dropItem(Lnet/minecraft/client/player/LocalPlayer;Z)V"))
+    private void interactic$handleQuickDrop(MultiPlayerGameMode gameMode, LocalPlayer clientPlayer, boolean dropEntireStack) {
+        if (InteracticInit.getConfig().itemThrowing() && !((Minecraft) (Object) this).hasShiftDown()) return;
+        gameMode.dropItem(clientPlayer, dropEntireStack);
     }
 
     @Inject(method = "handleKeybinds", at = @At("RETURN"))
@@ -95,16 +90,16 @@ public class MinecraftClientMixin {
 
             if (interactic$dropPower >= 1.5) {
                 float sentPower = interactic$dropPower;
-                InteracticNetworking.CHANNEL.clientHandle().send(new InteracticNetworking.DropWithPower(interactic$dropPower, dropAll, this.player.getXRot(), this.player.getYRot()));
+                InteracticNetworking.sendToServer(new InteracticNetworking.DropWithPower(interactic$dropPower, dropAll, this.player.getXRot(), this.player.getYRot()));
 
                 int count = dropAll && !this.player.getInventory().getSelectedItem().isEmpty() ? this.player.getInventory().getSelectedItem().getCount() : 1;
                 ItemStack taken = this.player.getInventory().removeItem(this.player.getInventory().getSelectedSlot(), count);
                 if (!taken.isEmpty()) {
-                    if (InteracticInit.getConfig().swingArm()) this.player.swing(InteractionHand.MAIN_HAND);
+                    if (InteracticInit.getConfig().swingArm()) this.player.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, false);
                     player.sendOverlayMessage(Component.literal("Thrown at power: " + BigDecimal.valueOf(sentPower).setScale(1, RoundingMode.HALF_UP)));
                 }
-            } else if (this.player.drop(dropAll)) {
-                if (InteracticInit.getConfig().swingArm()) this.player.swing(InteractionHand.MAIN_HAND);
+            } else {
+                this.gameMode.dropItem(this.player, dropAll);
             }
 
             interactic$dropPower = 0.9f;

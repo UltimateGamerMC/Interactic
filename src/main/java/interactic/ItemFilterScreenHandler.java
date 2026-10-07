@@ -36,7 +36,7 @@ public class ItemFilterScreenHandler extends AbstractContainerMenu {
     public void setFilterMode(boolean mode) {
         if (!(inventory instanceof ItemFilterItem.FilterInventory filterInventory)) return;
         filterInventory.setFilterMode(mode);
-        InteracticNetworking.CHANNEL.serverHandle(player).send(new ItemFilterItem.SetFilterModePacket(mode));
+        InteracticNetworking.sendToPlayer(player, new ItemFilterItem.SetFilterModePacket(mode));
     }
 
     @Override

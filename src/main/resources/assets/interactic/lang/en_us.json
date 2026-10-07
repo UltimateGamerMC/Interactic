@@ -6,13 +6,10 @@
   "death.attack.thrown_item.shovel": "%1$s was whacked by %2$s using %3$s",
   "death.attack.thrown_item.pickaxe": "%1$s was pierced by %2$s using %3$s",
   "death.attack.thrown_item.hoe": "%1$s was reaped by %2$s using %3$s",
-
   "key.interactic.pickup_item": "[Interactic] Pick up Item",
-
   "text.config.interactic.title": "Interactic Configuration",
   "text.config.interactic.section.global": "Global Options",
   "text.config.interactic.section.client": "Client-Only Options",
-
   "text.config.interactic.option.clientOnlyMode": "Client Only Mode",
   "text.config.interactic.option.rightClickPickup": "Right Click Pickup",
   "text.config.interactic.option.itemFilterEnabled": "Item Filter",
@@ -23,5 +20,17 @@
   "text.config.interactic.option.itemThrowing": "Item Throwing",
   "text.config.interactic.option.itemsActAsProjectiles": "Items act as projectiles",
   "text.config.interactic.option.swingArm": "Swing arm on drop",
-  "text.config.interactic.option.blocksLayFlat": "Blocks lay flat"
+  "text.config.interactic.option.blocksLayFlat": "Blocks lay flat",
+  "text.config.interactic.option.clientOnlyMode.tooltip": "Only the visual features. Use this on servers that don't have Interactic installed.",
+  "text.config.interactic.option.rightClickPickup.tooltip": "Pick up items by right-clicking them (also enables the pickup keybind).",
+  "text.config.interactic.option.itemThrowing.tooltip": "Hold the drop key to charge up and throw items farther.",
+  "text.config.interactic.option.itemFilterEnabled.tooltip": "Adds the Item Filter, which controls what you auto-pickup.",
+  "text.config.interactic.option.itemsActAsProjectiles.tooltip": "Thrown weapons and tools deal damage when they hit something.",
+  "text.config.interactic.option.autoPickup.tooltip": "Pick up items by walking over them like vanilla.",
+  "text.config.interactic.option.fancyItemRendering.tooltip": "Dropped items lie on the ground and tumble when thrown.",
+  "text.config.interactic.option.renderItemTooltips.tooltip": "Show the name of the item under your crosshair.",
+  "text.config.interactic.option.renderFullTooltip.tooltip": "Show the full tooltip of the item under your crosshair.",
+  "text.config.interactic.option.swingArm.tooltip": "Swing your arm when dropping items.",
+  "text.config.interactic.option.blocksLayFlat.tooltip": "Dropped blocks lie flat on the ground too.",
+  "text.config.interactic.restart": "§7Requires a restart"
 }

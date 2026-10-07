@@ -14,7 +14,6 @@ import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 
-import java.util.function.Consumer;
 
 public class InteracticInit implements ModInitializer {
 
@@ -30,22 +29,6 @@ public class InteracticInit implements ModInitializer {
 
     @Override
     public void onInitialize() {
-        CONFIG.subscribeToClientOnlyMode(clientOnlyMode -> {
-            if (!clientOnlyMode) return;
-
-            CONFIG.itemsActAsProjectiles(false);
-            CONFIG.itemThrowing(false);
-            CONFIG.itemFilterEnabled(false);
-            CONFIG.autoPickup(true);
-            CONFIG.rightClickPickup(false);
-        });
-
-        enforceInClientOnlyMode(CONFIG::subscribeToItemsActAsProjectiles, CONFIG::itemsActAsProjectiles, false);
-        enforceInClientOnlyMode(CONFIG::subscribeToItemThrowing, CONFIG::itemThrowing, false);
-        enforceInClientOnlyMode(CONFIG::subscribeToItemFilterEnabled, CONFIG::itemFilterEnabled, false);
-        enforceInClientOnlyMode(CONFIG::subscribeToAutoPickup, CONFIG::autoPickup, true);
-        enforceInClientOnlyMode(CONFIG::subscribeToRightClickPickup, CONFIG::rightClickPickup, false);
-
         if (FabricLoader.getInstance().isModLoaded("iris")) itemRotationSpeedMultiplier = 0.5f;
 
         if (CONFIG.itemFilterEnabled()) {
@@ -62,13 +45,6 @@ public class InteracticInit implements ModInitializer {
 
     public static Item getItemFilter() {
         return ITEM_FILTER == null ? Items.AIR : ITEM_FILTER;
-    }
-
-    private static void enforceInClientOnlyMode(Consumer<Consumer<Boolean>> eventSource, Consumer<Boolean> setter, boolean defaultValue) {
-        eventSource.accept(value -> {
-            if (!CONFIG.clientOnlyMode()) return;
-            if (value != defaultValue) setter.accept(defaultValue);
-        });
     }
 
     public static float getItemRotationSpeedMultiplier() {

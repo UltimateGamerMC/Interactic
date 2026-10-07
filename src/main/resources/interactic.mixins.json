@@ -6,7 +6,8 @@
     "InGameHudMixin",
     "ItemEntityRenderStateMixin",
     "ItemEntityRendererMixin",
-    "MinecraftClientMixin"
+    "MinecraftClientMixin",
+    "MultiPlayerGameModeMixin"
   ],
   "injectors": {
     "defaultRequire": 1

@@ -102,7 +102,7 @@ public class ItemFilterItem extends Item {
                 }
             };
             user.openMenu(factory);
-            InteracticNetworking.CHANNEL.serverHandle(user).send(new SetFilterModePacket(inv.getFilterMode()));
+            InteracticNetworking.sendToPlayer(user, new SetFilterModePacket(inv.getFilterMode()));
         }
         return InteractionResult.SUCCESS;
     }
@@ -168,5 +168,14 @@ public class ItemFilterItem extends Item {
         });
     }
 
-    public record SetFilterModePacket(boolean mode) {}
+    public record SetFilterModePacket(boolean mode) implements net.minecraft.network.protocol.common.custom.CustomPacketPayload {
+        public static final Type<SetFilterModePacket> TYPE = new Type<>(InteracticInit.id("set_filter_mode"));
+        public static final net.minecraft.network.codec.StreamCodec<net.minecraft.network.RegistryFriendlyByteBuf, SetFilterModePacket> CODEC =
+            net.minecraft.network.codec.ByteBufCodecs.BOOL.map(SetFilterModePacket::new, SetFilterModePacket::mode).cast();
+
+        @Override
+        public Type<SetFilterModePacket> type() {
+            return TYPE;
+        }
+    }
 }

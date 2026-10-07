@@ -40,13 +40,13 @@ public class ItemFilterScreen extends AbstractContainerScreen<ItemFilterScreenHa
     }
 
     private static void sendModeRequest(boolean mode) {
-        InteracticNetworking.CHANNEL.clientHandle().send(new InteracticNetworking.FilterModeRequest(mode));
+        InteracticNetworking.sendToServer(new InteracticNetworking.FilterModeRequest(mode));
     }
 
     @Override
     public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
         super.extractRenderState(graphics, mouseX, mouseY, partialTick);
-        graphics.text(this.font, "Mode", this.leftPos + 8, this.topPos + 80, 0x404040, false);
+        graphics.text(this.font, "Mode", this.leftPos + 8, this.topPos + 80, 0xFF404040, false);
         if (this.blockButton != null) {
             this.blockButton.active = !this.blockMode;
             this.allowButton.active = this.blockMode;

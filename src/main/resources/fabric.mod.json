@@ -8,9 +8,9 @@
     "glisco"
   ],
   "contact": {
-    "homepage": "https://www.curseforge.com/minecraft/mc-mods/interactic",
-    "sources": "https://github.com/gliscowo/interactic",
-    "issues": "https://github.com/gliscowo/interactic/issues"
+    "homepage": "https://modrinth.com/mod/interactic-updated",
+    "sources": "https://github.com/UltimateGamerMC/Interactic",
+    "issues": "https://github.com/UltimateGamerMC/Interactic/issues"
   },
   "license": "MIT",
   "icon": "assets/interactic/icon.png",
@@ -37,9 +37,8 @@
     }
   },
   "depends": {
-    "fabricloader": ">=0.18.0",
-    "fabric-api": ">=0.145.0",
-    "minecraft": ">=26.1.1",
-    "owo": ">=0.13.0"
+    "fabricloader": ">=0.19.0",
+    "fabric-api": "*",
+    "minecraft": "~26.3"
   }
 }

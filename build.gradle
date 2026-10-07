@@ -1,5 +1,5 @@
 plugins {
-    id 'net.fabricmc.fabric-loom' version '1.16.0-alpha.16'
+    id 'net.fabricmc.fabric-loom' version '1.18.3'
     id 'maven-publish'
 }
 
@@ -15,7 +15,6 @@ repositories {
         name = "TerraformersMC"
         url = "https://maven.terraformersmc.com/"
     }
-    maven { url "https://maven.wispforest.io/" }
     maven { url "https://jitpack.io" }
 }
 
@@ -25,10 +24,6 @@ dependencies {
     implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
     implementation "net.fabricmc.fabric-api:fabric-key-mapping-api-v1:2.0.4+e2bdee7845"
 
-    implementation "io.wispforest:owo-lib:${project.owo_version}"
-    annotationProcessor "io.wispforest:owo-lib:${project.owo_version}"
-    implementation "io.wispforest:owo-sentinel:${project.owo_version}"
-    include "io.wispforest:owo-sentinel:${project.owo_version}"
 
     compileOnly "com.terraformersmc:modmenu:${project.modmenu_version}"
 }

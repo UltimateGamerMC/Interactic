@@ -61,7 +61,7 @@ public class ItemEntityRendererMixin {
         poseStack.translate(0, (this.interactic$random.nextDouble() - 0.5) * 0.005, 0);
         if (treatAsDepthModel && !isFlatBlock) poseStack.translate(0, -.1, 0);
 
-        poseStack.mulPose(Axis.YP.rotationDegrees(stateExt.interactic$getYaw()));
+        poseStack.rotate(Axis.YP.rotationDegrees(stateExt.interactic$getYaw()));
         float angle = stateExt.interactic$getCustomRotation();
 
         while (angle < 0) angle += TWO_PI;
@@ -77,14 +77,14 @@ public class ItemEntityRendererMixin {
 
         if (treatAsDepthModel) poseStack.translate(0, -distanceToCenter, 0);
         if (stateExt.interactic$isOnGround()) {
-            poseStack.mulPose(Axis.XP.rotation(isFlatBlock ? 0f : HALF_PI));
+            poseStack.rotate(Axis.XP.rotation(isFlatBlock ? 0f : HALF_PI));
         } else {
-            poseStack.mulPose(Axis.XP.rotation(angle + (isFlatBlock ? 0 : HALF_PI)));
+            poseStack.rotate(Axis.XP.rotation(angle + (isFlatBlock ? 0 : HALF_PI)));
         }
 
         if (treatAsDepthModel && !isFlatBlock && !InteracticInit.getConfig().blocksLayFlat()) {
-            poseStack.mulPose(Axis.YP.rotationDegrees(this.interactic$random.nextFloat() * 45));
-            poseStack.mulPose(Axis.ZP.rotationDegrees(this.interactic$random.nextFloat() * 45));
+            poseStack.rotate(Axis.YP.rotationDegrees(this.interactic$random.nextFloat() * 45));
+            poseStack.rotate(Axis.ZP.rotationDegrees(this.interactic$random.nextFloat() * 45));
         }
 
         if (treatAsDepthModel) {

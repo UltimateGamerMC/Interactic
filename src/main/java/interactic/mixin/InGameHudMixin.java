@@ -4,7 +4,7 @@ import interactic.InteracticInit;
 import interactic.util.Helpers;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.Gui;
+import net.minecraft.client.gui.Hud;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.TooltipFlag;
@@ -15,7 +15,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.List;
 
-@Mixin(Gui.class)
+@Mixin(Hud.class)
 public class InGameHudMixin {
 
     @Inject(method = "extractCrosshair", at = @At("TAIL"))
@@ -35,7 +35,7 @@ public class InGameHudMixin {
 
         for (int i = 0, tooltipSize = tooltip.size(); i < tooltipSize; i++) {
             final var text = tooltip.get(i);
-            graphics.text(client.font, text, graphics.guiWidth() / 2 - client.font.width(text) / 2, graphics.guiHeight() / 2 + 15 + i * 10, 0xFFFFFF, true);
+            graphics.text(client.font, text, graphics.guiWidth() / 2 - client.font.width(text) / 2, graphics.guiHeight() / 2 + 15 + i * 10, 0xFFFFFFFF, true);
         }
     }
 }
